@@ -8,6 +8,7 @@ import (
 	"runtime"
 	"strconv"
 	"strings"
+	"os/exec"
 
 	"github.com/mitchellh/go-ps"
 
@@ -89,6 +90,11 @@ func (p *PsCmd) Execute(_ context.Context, f *flag.FlagSet, _ ...interface{}) su
 
 	} else if p.Background {
 		fmt.Println("Running Background")
+		err := exec.Command("go","run","./commands/subcommand/test_ls.go").Start()
+		if err != nil{
+				fmt.Println("out exec error")
+				fmt.Println(err)
+		}
 	} else {
 		fmt.Println("Exit")
 	}
