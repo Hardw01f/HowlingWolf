@@ -32,6 +32,7 @@ func (p *PortCmd) SetFlags(f *flag.FlagSet) {
 }
 func (p *PortCmd) Execute(_ context.Context, f *flag.FlagSet, _ ...interface{}) subcommands.ExitStatus {
 
+	//config.TomlLoader()
 	args := f.Args()
 
 	fmt.Println("MS-06S")
@@ -67,11 +68,14 @@ func (p *PortCmd) Execute(_ context.Context, f *flag.FlagSet, _ ...interface{}) 
 		}
 	} else if p.BackGround && p.Monitor {
 		fmt.Println("backgrund")
-		err := exec.Command("./deamon/deamontest").Start()
-		if err != nil {
-			fmt.Println(err)
-		}
+		/*
+			err := exec.Command("./deamon/deamontest").Start()
+			if err != nil {
+				fmt.Println(err)
+			}
+			//fmt.Printf("name is %s\n", config.Server.Name)
 
+		*/
 	} else if p.Monitor {
 		if flag.NArg() != 3 {
 			fmt.Println("Usage : port -monitor [MonitorPortNumber]")
@@ -103,6 +107,11 @@ func CheckPort(Port string) {
 	for {
 		openport = ps.GetOpenedPort(OnePort, OnePort)
 		if len(openport) == 0 {
+			str := fmt.Sprintf("Warning : [%d] : %s was killed!!\n", TargetPort, TargetPortProcess)
+			err := exec.Command("wall", "Warning : ", str)
+			if err != nil {
+				fmt.Println(err)
+			}
 			fmt.Printf("Warnig!!! : [%d] : %s  was killed!!\n", TargetPort, TargetPortProcess)
 			os.Exit(1)
 		}

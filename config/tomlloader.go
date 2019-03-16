@@ -14,7 +14,7 @@ type ServerConfig struct {
 	Name string
 }
 
-func TomlLoader() {
+func TomlLoader() Config {
 	var config Config
 	_, err := toml.DecodeFile("config.toml", &config)
 	if err != nil {
