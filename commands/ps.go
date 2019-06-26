@@ -12,6 +12,7 @@ import (
 	"strings"
 	"time"
 
+	pipeline "github.com/mattn/go-pipeline"
 	"github.com/mitchellh/go-ps"
 
 	"github.com/google/subcommands"
@@ -91,8 +92,8 @@ func (p *PsCmd) Execute(_ context.Context, f *flag.FlagSet, _ ...interface{}) su
 		processname := FirstSearch(TargetPid)
 
 		for {
-				SearchPs(TargetPid,processname)
-				time.Sleep(1 * time.Second)
+			SearchPs(TargetPid, processname)
+			time.Sleep(1 * time.Second)
 		}
 
 	} else if p.Background {
@@ -115,31 +116,39 @@ func SearchPs(pid int, processname string) {
 	}
 
 	if SearchRes != nil {
-		fmt.Printf("%d %d %s\n", SearchRes.Pid(), SearchRes.PPid(), SearchRes.Executable())
+		//fmt.Printf("%d %d %s\n", SearchRes.Pid(), SearchRes.PPid(), SearchRes.Executable())
 	} else {
 		loc, err := time.LoadLocation("Asia/Tokyo")
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		nowtime := fmt.Sprintf("%s",time.Now().In(loc))
-		fmt.Printf("%s process is DOWN at %s\n",processname,nowtime)
+		nowtime := fmt.Sprintf("%s", time.Now().In(loc))
+		mes := fmt.Sprintf("%s process is DOWN at %s\n", processname, nowtime)
+		_, err = pipeline.Output(
+			[]string{"echo", mes},
+			[]string{"wall"},
+		)
+		if err != nil {
+			log.Fatal(err)
+		}
+
 		os.Exit(1)
 	}
 
 }
 
 func FirstSearch(pid int) string {
-		Res, err := ps.FindProcess(pid)
-		if err != nil {
-				log.Fatal(err)
-		}
+	Res, err := ps.FindProcess(pid)
+	if err != nil {
+		log.Fatal(err)
+	}
 
-		if Res == nil {
-				fmt.Printf("%d process is not exist\n",pid)
-				os.Exit(1)
-		}
-				processname := Res.Executable()
-				return processname
+	if Res == nil {
+		fmt.Printf("%d process is not exist\n", pid)
+		os.Exit(1)
+	}
+	processname := Res.Executable()
+	return processname
 
 }
