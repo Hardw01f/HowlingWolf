@@ -4,11 +4,12 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"log"
 	"os"
+	"os/exec"
 	"runtime"
 	"strconv"
 	"strings"
-	"os/exec"
 
 	"github.com/mitchellh/go-ps"
 
@@ -81,19 +82,23 @@ func (p *PsCmd) Execute(_ context.Context, f *flag.FlagSet, _ ...interface{}) su
 			os.Exit(1)
 		}
 
-		TargetPid, _ := strconv.Atoi(args[0])
+		TargetPid, err := strconv.Atoi(args[0])
+		if err != nil {
+			log.Fatal(err)
+		}
+
 		SearchRes, err := ps.FindProcess(TargetPid)
 		if err != nil {
-			fmt.Println(err)
+			log.Fatal(err)
 		}
 		fmt.Println(SearchRes)
 
 	} else if p.Background {
 		fmt.Println("Running Background")
-		err := exec.Command("go","run","./commands/subcommand/test_ls.go").Start()
-		if err != nil{
-				fmt.Println("out exec error")
-				fmt.Println(err)
+		err := exec.Command("go", "run", "./commands/subcommand/test_ls.go").Start()
+		if err != nil {
+			fmt.Println("out exec error")
+			fmt.Println(err)
 		}
 	} else {
 		fmt.Println("Exit")
