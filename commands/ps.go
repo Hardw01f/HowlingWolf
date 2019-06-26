@@ -74,9 +74,9 @@ func (p *PsCmd) Execute(_ context.Context, f *flag.FlagSet, _ ...interface{}) su
 		}
 
 	} else if p.PsMonitor {
-		fmt.Println("monitor starting")
+			fmt.Println("test : monitor starting")
 
-		fmt.Println(flag.NArg())
+		//fmt.Println(flag.NArg())
 		if flag.NArg() == 2 {
 			fmt.Println("Please show help : -h")
 			os.Exit(1)
@@ -87,11 +87,8 @@ func (p *PsCmd) Execute(_ context.Context, f *flag.FlagSet, _ ...interface{}) su
 			log.Fatal(err)
 		}
 
-		SearchRes, err := ps.FindProcess(TargetPid)
-		if err != nil {
-			log.Fatal(err)
-		}
-		fmt.Println(SearchRes)
+		SearchPs(TargetPid)
+
 
 	} else if p.Background {
 		fmt.Println("Running Background")
@@ -104,4 +101,14 @@ func (p *PsCmd) Execute(_ context.Context, f *flag.FlagSet, _ ...interface{}) su
 		fmt.Println("Exit")
 	}
 	return subcommands.ExitSuccess
+}
+
+func SearchPs(pid string) {
+		SearchPs, err := ps.FindProcess(pid)
+		if err != nil {
+				log.Fatal(err)
+		}
+
+		//fmt.Printf("%s\n",SearchRes)
+		fmt.Printf("Pid is %s\n",SearchPs.Pid())
 }
