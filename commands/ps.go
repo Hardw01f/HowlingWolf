@@ -10,6 +10,7 @@ import (
 	"runtime"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/mitchellh/go-ps"
 
@@ -39,7 +40,7 @@ func (p *PsCmd) SetFlags(f *flag.FlagSet) {
 }
 
 func (p *PsCmd) Execute(_ context.Context, f *flag.FlagSet, _ ...interface{}) subcommands.ExitStatus {
-	fmt.Println("GANDOM")
+	//fmt.Println("GANDOM")
 
 	args := f.Args()
 
@@ -74,7 +75,7 @@ func (p *PsCmd) Execute(_ context.Context, f *flag.FlagSet, _ ...interface{}) su
 		}
 
 	} else if p.PsMonitor {
-			fmt.Println("test : monitor starting")
+		fmt.Println("monitor starting")
 
 		//fmt.Println(flag.NArg())
 		if flag.NArg() == 2 {
@@ -87,8 +88,12 @@ func (p *PsCmd) Execute(_ context.Context, f *flag.FlagSet, _ ...interface{}) su
 			log.Fatal(err)
 		}
 
-		SearchPs(TargetPid)
+		processname := FirstSearch(TargetPid)
 
+		for {
+				SearchPs(TargetPid,processname)
+				time.Sleep(1 * time.Second)
+		}
 
 	} else if p.Background {
 		fmt.Println("Running Background")
@@ -103,12 +108,38 @@ func (p *PsCmd) Execute(_ context.Context, f *flag.FlagSet, _ ...interface{}) su
 	return subcommands.ExitSuccess
 }
 
-func SearchPs(pid string) {
-		SearchPs, err := ps.FindProcess(pid)
+func SearchPs(pid int, processname string) {
+	SearchRes, err := ps.FindProcess(pid)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if SearchRes != nil {
+		fmt.Printf("%d %d %s\n", SearchRes.Pid(), SearchRes.PPid(), SearchRes.Executable())
+	} else {
+		loc, err := time.LoadLocation("Asia/Tokyo")
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		nowtime := fmt.Sprintf("%s",time.Now().In(loc))
+		fmt.Printf("%s process is DOWN at %s\n",processname,nowtime)
+		os.Exit(1)
+	}
+
+}
+
+func FirstSearch(pid int) string {
+		Res, err := ps.FindProcess(pid)
 		if err != nil {
 				log.Fatal(err)
 		}
 
-		//fmt.Printf("%s\n",SearchRes)
-		fmt.Printf("Pid is %s\n",SearchPs.Pid())
+		if Res == nil {
+				fmt.Printf("%d process is not exist\n",pid)
+				os.Exit(1)
+		}
+				processname := Res.Executable()
+				return processname
+
 }

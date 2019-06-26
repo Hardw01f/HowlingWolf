@@ -15,4 +15,12 @@ func main(){
 		fmt.Println(out)
 
 		time.Sleep(10 * time.Second)
+
+		WallOut, err := exec.Command("wall","TEST").Output()
+		if err != nil{
+				fmt.Println(err)
+				fmt.Println("occerd error")
+				//break
+		}
+		fmt.Println(WallOut)
 }

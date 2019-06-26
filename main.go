@@ -5,8 +5,8 @@ import (
 	"flag"
 	"os"
 
-	//"./commands"
-	"github.com/Snow-HardWolf/HowlingWolf/commands"
+	"./commands"
+	//"github.com/Snow-HardWolf/HowlingWolf/commands"
 	"github.com/google/subcommands"
 )
 
