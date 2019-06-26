@@ -4,7 +4,9 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"log"
 	"os"
+	"os/exec"
 	"runtime"
 	"strconv"
 	"strings"
@@ -72,25 +74,41 @@ func (p *PsCmd) Execute(_ context.Context, f *flag.FlagSet, _ ...interface{}) su
 		}
 
 	} else if p.PsMonitor {
-		fmt.Println("monitor starting")
+			fmt.Println("test : monitor starting")
 
-		fmt.Println(flag.NArg())
+		//fmt.Println(flag.NArg())
 		if flag.NArg() == 2 {
 			fmt.Println("Please show help : -h")
 			os.Exit(1)
 		}
 
-		TargetPid, _ := strconv.Atoi(args[0])
-		SearchRes, err := ps.FindProcess(TargetPid)
+		TargetPid, err := strconv.Atoi(args[0])
 		if err != nil {
-			fmt.Println(err)
+			log.Fatal(err)
 		}
-		fmt.Println(SearchRes)
+
+		SearchPs(TargetPid)
+
 
 	} else if p.Background {
 		fmt.Println("Running Background")
+		err := exec.Command("go", "run", "./commands/subcommand/test_ls.go").Start()
+		if err != nil {
+			fmt.Println("out exec error")
+			fmt.Println(err)
+		}
 	} else {
 		fmt.Println("Exit")
 	}
 	return subcommands.ExitSuccess
+}
+
+func SearchPs(pid string) {
+		SearchPs, err := ps.FindProcess(pid)
+		if err != nil {
+				log.Fatal(err)
+		}
+
+		//fmt.Printf("%s\n",SearchRes)
+		fmt.Printf("Pid is %s\n",SearchPs.Pid())
 }
