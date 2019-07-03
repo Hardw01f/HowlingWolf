@@ -34,9 +34,9 @@ func (*PsCmd) Usage() string {
 
 func (p *PsCmd) SetFlags(f *flag.FlagSet) {
 	f.StringVar(&p.Sentence, "t", "RX-78-2", "testtest")
-	f.BoolVar(&p.Option, "o", false, "X105 Strike")
+	f.BoolVar(&p.Option, "o", false, "test-option  X105 Strike")
 	f.BoolVar(&p.PsShow, "show", false, "show Process list like linux ps command")
-	f.BoolVar(&p.PsMonitor, "monitor", false, "Monitor specific processes by PID")
+	f.BoolVar(&p.PsMonitor, "monitor", false, "USAGE : -monitor PID    Monitor specific processes by PID")
 	f.BoolVar(&p.Background, "b", false, "Running Background")
 }
 
@@ -104,7 +104,7 @@ func (p *PsCmd) Execute(_ context.Context, f *flag.FlagSet, _ ...interface{}) su
 			fmt.Println(err)
 		}
 	} else {
-		fmt.Println("Exit")
+		fmt.Println("'ps -help' show option help")
 	}
 	return subcommands.ExitSuccess
 }
