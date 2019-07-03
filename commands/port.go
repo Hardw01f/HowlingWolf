@@ -4,19 +4,20 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"log"
 	"os"
-	"os/exec"
 	"strconv"
 	"time"
 
 	portscanner "github.com/anvie/port-scanner"
 	"github.com/google/subcommands"
+	pipeline "github.com/mattn/go-pipeline"
 )
 
 type PortCmd struct {
-	Scan       bool
-	Monitor    bool
-	BackGround bool
+	Test    bool
+	Scan    bool
+	Monitor bool
 }
 
 func (*PortCmd) Name() string     { return "port" }
@@ -26,17 +27,18 @@ func (*PortCmd) Usage() string {
 }
 
 func (p *PortCmd) SetFlags(f *flag.FlagSet) {
+	f.BoolVar(&p.Test, "test", false, "TEST option")
 	f.BoolVar(&p.Scan, "scan", false, "Usuge")
-	f.BoolVar(&p.Monitor, "monitor", false, "")
-	f.BoolVar(&p.BackGround, "b", false, "run in background")
+	f.BoolVar(&p.Monitor, "monitor", false, "Usage : port -monitor [MonitorPortNumber]")
 }
 func (p *PortCmd) Execute(_ context.Context, f *flag.FlagSet, _ ...interface{}) subcommands.ExitStatus {
 
 	//config.TomlLoader()
 	args := f.Args()
 
-	fmt.Println("MS-06S")
-	if p.Scan {
+	if p.Test {
+		fmt.Println("MS-06S")
+	} else if p.Scan {
 		//fmt.Println(flag.NArg())
 		if flag.NArg() != 4 {
 			fmt.Println("Usage : port -scan [Start-port] [End-port]")
@@ -66,16 +68,6 @@ func (p *PortCmd) Execute(_ context.Context, f *flag.FlagSet, _ ...interface{}) 
 			fmt.Print(" ", port, " [open]")
 			fmt.Println("  -->  ", ps.DescribePort(port))
 		}
-	} else if p.BackGround && p.Monitor {
-		fmt.Println("backgrund")
-		/*
-			err := exec.Command("./deamon/deamontest").Start()
-			if err != nil {
-				fmt.Println(err)
-			}
-			//fmt.Printf("name is %s\n", config.Server.Name)
-
-		*/
 	} else if p.Monitor {
 		if flag.NArg() != 3 {
 			fmt.Println("Usage : port -monitor [MonitorPortNumber]")
@@ -107,15 +99,26 @@ func CheckPort(Port string) {
 	for {
 		openport = ps.GetOpenedPort(OnePort, OnePort)
 		if len(openport) == 0 {
-			str := fmt.Sprintf("Warning : [%d] : %s was killed!!\n", TargetPort, TargetPortProcess)
-			err := exec.Command("wall", "Warning : ", str)
-			if err != nil {
-				fmt.Println(err)
-			}
-			fmt.Printf("Warnig!!! : [%d] : %s  was killed!!\n", TargetPort, TargetPortProcess)
+			WallNotification(TargetPort,TargetPortProcess)
 			os.Exit(1)
 		}
-		//fmt.Println(openport[0], ps.DescribePort(openport[0]))
 		time.Sleep(1 * time.Second)
+	}
+}
+
+func WallNotification(TargetPort int,TargetPortProcess string) {
+	loc, err := time.LoadLocation("Asia/Tokyo")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	nowtime := fmt.Sprintf("%s", time.Now().In(loc))
+	mes := fmt.Sprintf("Warning : [%d] : %s was killed at %s \n", TargetPort, TargetPortProcess, nowtime)
+	_, err = pipeline.Output(
+		[]string{"echo", mes},
+		[]string{"wall"},
+	)
+	if err != nil {
+		log.Fatal(err)
 	}
 }
